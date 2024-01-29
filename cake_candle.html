@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Julia Bialy</title>
+
+    <style>
+
+body {
+    background-color: #211571;
+}
+
+.cake {
+    position: absolute;
+    width: 250px;
+    height: 200px;
+    top: 50%;
+    left: 50%;
+    margin-top: -70px;
+    margin-left: -125px;
+}
+
+.plate {
+    width: 270px;
+    height: 110px;
+    position: absolute;
+    bottom: -10px;
+    left: -10px;
+    background-color: #ccc;
+    border-radius: 50%;
+}
+
+.cake > * {
+    position: absolute;
+}
+
+
+
+
+.icing {
+    top: 2px;
+    left: 5px;
+    width: 240px;
+    height: 90px;
+    border-radius: 50%;
+    .before {
+        content: "";
+        position: absolute;
+        top: 4px;
+        right: 5px;
+        bottom: 6px;
+        left: 5px;
+        background-color: lighten;
+        border-radius: 50%;
+        z-index: 1;
+    }
+}
+
+
+
+.candle {
+    background-color: #7B020B;
+    width: 16px;
+    height: 50px;
+    border-radius: 8px / 4px;
+    top: -20px;
+    left: 50%;
+    margin-left: -8px;
+    z-index: 10;
+    before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 16px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: lighten(#7B020B, 10%);
+    }
+}
+
+.flame {
+    position: absolute;
+    background-color: orange;
+    width: 15px;
+    height: 35px;
+    border-radius: 10px 10px 10px 10px / 25px 25px 10px 10px;
+    top: -34px;
+    left: 50%;
+    margin-left: -7.5px;
+    z-index: 10;
+    box-shadow:
+        0 0 10px rgba(orange, 0.5),
+        0 0 20px rgba(orange, 0.5),
+        0 0 60px rgba(orange, 0.5),
+        0 0 80px rgba(orange, 0.5);
+    transform-origin: 50% 90%;
+    animation: flicker 1s ease-in-out alternate infinite;
+}
+
+@keyframes flicker {
+    0% {
+        transform: skewX(5deg);
+        box-shadow: 
+            0 0 10px rgba(orange, 0.2),
+            0 0 20px rgba(orange, 0.2),
+            0 0 60px rgba(orange, 0.2),
+            0 0 80px rgba(orange, 0.2) }
+    25% {
+        transform: skewX(-5deg);
+        box-shadow:
+            0 0 10px rgba(orange, 0.5),
+            0 0 20px rgba(orange, 0.5),
+            0 0 60px rgba(orange, 0.5),
+            0 0 80px rgba(orange, 0.5) }
+    50% {
+        transform: skewX(10deg);
+        box-shadow:
+            0 0 10px rgba(orange, 0.3),
+            0 0 20px rgba(orange, 0.3),
+            0 0 60px rgba(orange, 0.3),
+            0 0 80px rgba(orange, 0.3) }
+    75% {
+        transform: skewX(-10deg);
+        box-shadow:
+            0 0 10px rgba(orange, 0.4),
+            0 0 20px rgba(orange, 0.4),
+            0 0 60px rgba(orange, 0.4),
+            0 0 80px rgba(orange, 0.4) }
+    100% {
+        transform: skewX(5deg);
+        box-shadow:
+            0 0 10px rgba(orange, 0.5),
+            0 0 20px rgba(orange, 0.5),
+            0 0 60px rgba(orange, 0.5),
+            0 0 80px rgba(orange, 0.5) }
+}
+
+    </style>
+  </head>
+  <body>
+
+
+   
+    <div class="cake-container">
+      <div class="cake">
+        <div class="plate"></div>
+
+
+        <div class ="candle">
+          <div class="flame"></div>
+        </div>
+ 
+      
+    </div></div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+       
+        const flameContainer = document.querySelector(".flame");
+
+   
+        const pyroElement = document.querySelector(".pyro");
+
+        let isBlowing = false;
+        let currentFlame = 0;
+
+        function setupMicrophone() {
+          return navigator.mediaDevices
+            .getUserMedia({ audio: true })
+            .then(function (stream) {
+              const audioContext = new AudioContext();
+              const analyser = audioContext.createAnalyser();
+              const microphone = audioContext.createMediaStreamSource(stream);
+              microphone.connect(analyser);
+
+              analyser.fftSize = 256;
+              const bufferLength = analyser.frequencyBinCount;
+              const dataArray = new Uint8Array(bufferLength);
+
+              function checkBlow() {
+                analyser.getByteFrequencyData(dataArray);
+                const average = getVolume(dataArray);
+
+                if (average > 100) {
+                  if (!isBlowing) {
+                    isBlowing = true;
+                    simulateBlow();
+                  }
+                } else {
+                  isBlowing = false;
+                }
+                requestAnimationFrame(checkBlow);
+              }
+              checkBlow();
+            })
+            .catch(function (err) {
+              console.error("Error accessing microphone:", err);
+            });
+        }
+
+   
+
+        function getVolume(array) {
+          let sum = 0;
+          for (let i = 0; i < array.length; i++) {
+            sum += array[i];
+          }
+          return sum / array.length;
+        }
+
+        function simulateBlow() {
+          
+          flameContainer.classList.remove("flame");
+
+          const flames = [
+            "flame2",
+            "flame3",
+            "flame2",
+            "flame3",
+            "flame4",
+            "flame5",
+          ];
+
+          if (currentFlame < flames.length) {
+            flameContainer.classList.add(flames[currentFlame]);
+
+            if (currentFlame === flames.length - 1) {
+              playHappyBirthday();
+            }
+
+            if (currentFlame < flames.length - 1) {
+              setTimeout(() => {
+                flameContainer.classList.remove(flames[currentFlame]);
+                currentFlame++;
+                simulateBlow();
+              }, 40); 
+            } else {
+              
+              pyroElement.style.display = "block";
+              isBlowing = false;
+            }
+          }
+        }
+        setupMicrophone();
+      });
+    </script>
+  </body>
+</html>
